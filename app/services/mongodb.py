@@ -1,4 +1,3 @@
- 
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import settings
 from typing import List, Optional
@@ -9,7 +8,11 @@ class MongoDB:
     
     @classmethod
     def connect(cls):
-        cls.client = AsyncIOMotorClient(settings.mongo_uri)
+        # Simple connection with TLS options in connection string
+        cls.client = AsyncIOMotorClient(
+            settings.mongo_uri,
+            tlsAllowInvalidCertificates=True
+        )
         
     @classmethod
     def close(cls):
@@ -24,7 +27,8 @@ class MongoDB:
 async def get_products(
     category: Optional[str] = None,
     limit: int = 20,
-    skip: int = 0
+    skip: int = 0,
+    require_embedding: bool = False
 ) -> List[dict]:
     col = MongoDB.get_collection()
     filter_query = {}
@@ -32,8 +36,8 @@ async def get_products(
     if category:
         filter_query["category"] = category
     
-    # Only return products with embeddings
-    filter_query["embedding"] = {"$exists": True, "$ne": None}
+    if require_embedding:
+        filter_query["embedding"] = {"$exists": True, "$ne": None}
     
     cursor = col.find(filter_query).skip(skip).limit(limit)
     products = []
