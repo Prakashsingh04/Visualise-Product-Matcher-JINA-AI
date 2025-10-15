@@ -9,7 +9,7 @@ client = MongoClient(os.getenv("MONGO_URI"))
 db = client[os.getenv("MONGO_DB", "visual_product_matcher")]
 col = db[os.getenv("MONGO_COL", "products")]
 
-sample = col.find_one({"embedding": {"$exists": True, "$n   e": None}})
+sample = col.find_one({"embedding": {"$exists": True, "$ne": None}})
 if sample:
     print(f"Database embedding dimensions: {len(sample['embedding'])}")
 else:

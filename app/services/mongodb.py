@@ -13,7 +13,8 @@ class MongoDB:
             raise RuntimeError("MONGO_URI is not configured. Set environment variable MONGO_URI.")
         cls.client = AsyncIOMotorClient(
             settings.mongo_uri,
-            tlsAllowInvalidCertificates=True
+            tlsAllowInvalidCertificates=True,
+            serverSelectionTimeoutMS=5000
         )
         
     @classmethod
