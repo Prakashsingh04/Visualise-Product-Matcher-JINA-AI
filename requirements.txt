@@ -1,0 +1,14 @@
+ 
+fastapi[all]
+motor
+pymongo[srv]
+python-multipart
+aiohttp
+httpx
+jina
+pydantic
+pydantic-settings
+python-dotenv
+uvicorn
+numpy
+streamlit
