@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 
 # API Base URL
-API_BASE = "http://localhost:8000/api"
+API_BASE = "https://visualise-product-matcher-jina-ai-1.onrender.com"
 
 # Page config
 st.set_page_config(
