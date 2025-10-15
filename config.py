@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     jina_endpoint: str = "https://api.jina.ai/v1/embeddings"
     
     # App settings
-    app_host: str = "0.0.0.0"
+    app_host: str = "127.0.0.1"
     app_port: int = 8000
     env: str = "development"
     debug: bool = True
