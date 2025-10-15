@@ -51,7 +51,7 @@ def get_categories():
         if response.status_code == 200:
             return response.json().get("categories", [])
     except:
-        st.error("⚠️ Backend API not running. Please start FastAPI with: `uvicorn main:app --reload`")
+        st.error("Backend API not running. Please start FastAPI with: `uvicorn main:app --reload`")
         return []
     return []
 
@@ -101,37 +101,37 @@ def search_similar_upload(image_file, top_k=10, min_similarity=0.3, category=Non
         return None
 
 # Main App
-st.markdown('<h1 class="main-header">🔍 Visual Product Matcher</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">Visual Product Matcher</h1>', unsafe_allow_html=True)
 st.markdown("**Find visually similar products using AI-powered image embeddings**")
 
 # Check backend
 categories = get_categories()
 if not categories:
-    st.warning("⚠️ Cannot connect to backend. Make sure FastAPI is running on http://localhost:8000")
+    st.warning("Cannot connect to backend. Make sure FastAPI is running on http://localhost:8000")
     st.code("uvicorn main:app --reload", language="bash")
     st.stop()
 
 # Sidebar
-st.sidebar.header("⚙️ Search Settings")
+st.sidebar.header("⚙️Search Settings")
 st.sidebar.markdown("---")
 
 selected_category = st.sidebar.selectbox(
-    "📂 Filter by Category",
+    "Filter by Category",
     options=["All"] + categories,
     index=0,
-    format_func=lambda x: x.capitalize() if x != "All" else "🌐 All Categories"
+    format_func=lambda x: x.capitalize() if x != "All" else "All Categories"
 )
 category_filter = None if selected_category == "All" else selected_category
 
 st.sidebar.markdown("---")
 top_k = st.sidebar.slider("🔢 Number of Results", 1, 20, 10)
-min_similarity = st.sidebar.slider("📊 Min Similarity", 0.0, 1.0, 0.3, 0.05, format="%.2f")
+min_similarity = st.sidebar.slider("Min Similarity", 0.0, 1.0, 0.3, 0.05, format="%.2f")
 
 st.sidebar.markdown("---")
 st.sidebar.info(f"**Current Filter:** {selected_category if selected_category != 'All' else 'All Categories'}")
 
 # Main Content
-tab1, tab2, tab3 = st.tabs(["📤 Upload Image", "🔗 Search by URL", "📦 Browse Products"])
+tab1, tab2, tab3 = st.tabs(["Upload Image", "Search by URL", "Browse Products"])
 
 with tab1:
     st.header("Upload Image File")
@@ -151,8 +151,8 @@ with tab1:
         with col_info:
             st.info(f"**File:** {uploaded_file.name}\n\n**Size:** {uploaded_file.size / 1024:.1f} KB\n\n**Type:** {uploaded_file.type}")
             
-            if st.button("🔎 Find Similar Products", type="primary", key="upload_search"):
-                with st.spinner("🔄 Processing image and searching..."):
+            if st.button("Find Similar Products", type="primary", key="upload_search"):
+                with st.spinner("Processing image and searching..."):
                     # Reset file pointer to beginning
                     uploaded_file.seek(0)
                     
@@ -165,7 +165,7 @@ with tab1:
                     )
                     
                     if results and results.get('results'):
-                        st.success(f"✅ Found {results['total_results']} similar products!")
+                        st.success(f"Found {results['total_results']} similar products!")
                         
                         st.markdown("---")
                         st.subheader("Search Results")
@@ -195,9 +195,9 @@ with tab1:
                                 </div>
                                 """, unsafe_allow_html=True)
                     elif results is not None:
-                        st.warning("⚠️ No similar products found. Try:\n- Lowering the similarity threshold\n- Uploading a different image\n- Checking if the image category matches your filter")
+                        st.warning("No similar products found. Try:\n- Lowering the similarity threshold\n- Uploading a different image\n- Checking if the image category matches your filter")
                     else:
-                        st.error("❌ Search failed. Check the backend logs for details.")
+                        st.error("Search failed. Check the backend logs for details.")
 
 with tab2:
     st.header("Search by Image URL")
@@ -206,12 +206,12 @@ with tab2:
     
     with col_input:
         image_url = st.text_input(
-            "🖼️ Paste Image URL",
+            "Paste Image URL",
             placeholder="https://res.cloudinary.com/.../image.jpg",
             help="Enter a direct image URL"
         )
         
-        search_button = st.button("🔎 Find Similar Products", type="primary", key="url_search")
+        search_button = st.button("Find Similar Products", type="primary", key="url_search")
     
     with col_preview:
         if image_url:
@@ -222,13 +222,13 @@ with tab2:
     
     if search_button:
         if not image_url:
-            st.warning("⚠️ Please enter an image URL")
+            st.warning("Please enter an image URL")
         else:
-            with st.spinner("🔄 Generating embedding and searching..."):
+            with st.spinner("Generating embedding and searching..."):
                 results = search_similar_url(image_url, top_k, min_similarity, category_filter)
                 
                 if results and results.get('results'):
-                    st.success(f"✅ Found {results['total_results']} similar products!")
+                    st.success(f"Found {results['total_results']} similar products!")
                     
                     st.markdown("---")
                     st.subheader("Search Results")
@@ -258,13 +258,13 @@ with tab2:
                             </div>
                             """, unsafe_allow_html=True)
                 else:
-                    st.error("❌ No similar products found.")
+                    st.error("No similar products found.")
 
 with tab3:
     st.header("Browse All Products")
     
     if category_filter:
-        st.info(f"📂 Showing: **{category_filter.title()}**")
+        st.info(f"Showing: **{category_filter.title()}**")
     
     # Fetch ALL products (no limit)
     with st.spinner("Loading products..."):
@@ -279,7 +279,7 @@ with tab3:
             with cols[idx % 5]:
                 st.image(product['url'], width="stretch")
                 st.caption(f"**{product['name']}**")
-                st.markdown(f"<small>📦 {product['category'].title()}</small>", unsafe_allow_html=True)
+                st.markdown(f"<small> {product['category'].title()}</small>", unsafe_allow_html=True)
     else:
         st.info("No products available.")
 
