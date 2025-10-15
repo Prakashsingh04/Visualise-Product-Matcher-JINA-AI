@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 
 # API Base URL
-API_BASE = "visualise-product-matcher-jina-ai.vercel.app"
+API_BASE = "https://visualise-product-matcher-jina-ai.vercel.app/"
 
 # Page config
 st.set_page_config(
