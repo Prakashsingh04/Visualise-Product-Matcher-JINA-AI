@@ -2,9 +2,17 @@ import streamlit as st
 import requests
 import base64
 from io import BytesIO
+import os
+import requests
+import streamlit as st
 
-# API Base URL
-API_BASE = "https://visualise-product-matcher-jina-ai.vercel.app/"
+# API Base URL (configurable)
+# Prefer Streamlit secrets, then environment variable, then default to deployed /api base
+API_BASE = (
+    st.secrets.get("API_BASE")
+    if hasattr(st, "secrets") and "API_BASE" in st.secrets
+    else os.getenv("API_BASE", "https://visualise-product-matcher-jina-ai.vercel.app/api")
+).rstrip("/")
 
 # Page config
 st.set_page_config(
@@ -51,7 +59,7 @@ def get_categories():
         if response.status_code == 200:
             return response.json().get("categories", [])
     except:
-        st.error("Backend API not running. Please start FastAPI with: `uvicorn main:app --reload`")
+        st.error(f"Cannot reach backend at {API_BASE}. Check deployment and network access.")
         return []
     return []
 
@@ -107,8 +115,10 @@ st.markdown("**Find visually similar products using AI-powered image embeddings*
 # Check backend
 categories = get_categories()
 if not categories:
-    st.warning("Cannot connect to backend. Make sure FastAPI is running on http://localhost:8000")
-    st.code("uvicorn main:app --reload", language="bash")
+    st.warning(
+        "Cannot connect to backend. Verify your API is reachable at: "
+        f"{API_BASE} (try opening {API_BASE}/health and {API_BASE}/categories)"
+    )
     st.stop()
 
 # Sidebar

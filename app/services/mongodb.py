@@ -9,6 +9,8 @@ class MongoDB:
     @classmethod
     def connect(cls):
         # Simple connection with TLS options in connection string
+        if not getattr(settings, "mongo_uri", None):
+            raise RuntimeError("MONGO_URI is not configured. Set environment variable MONGO_URI.")
         cls.client = AsyncIOMotorClient(
             settings.mongo_uri,
             tlsAllowInvalidCertificates=True
@@ -21,6 +23,15 @@ class MongoDB:
     
     @classmethod
     def get_collection(cls):
+        # In some serverless environments (e.g., Vercel), lifespan events may not run reliably.
+        # Ensure the client is connected lazily on first use.
+        if cls.client is None:
+            try:
+                cls.connect()
+            except Exception as e:
+                # Re-raise with clearer context
+                raise RuntimeError(f"Failed to initialize MongoDB client: {e}")
+
         db = cls.client[settings.mongo_db]
         return db[settings.mongo_col]
 
