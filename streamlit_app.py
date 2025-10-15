@@ -266,15 +266,20 @@ with tab3:
     if category_filter:
         st.info(f"📂 Showing: **{category_filter.title()}**")
     
-    products = get_products(category_filter, 15, 0)
+    # Fetch ALL products (no limit)
+    with st.spinner("Loading products..."):
+        products = get_products(category_filter, 100, 0)  # Increase limit to 100
     
     if products:
+        st.write(f"**Total: {len(products)} products**")
+        
+        # Display in grid (5 columns)
         cols = st.columns(5)
         for idx, product in enumerate(products):
             with cols[idx % 5]:
                 st.image(product['url'], width="stretch")
                 st.caption(f"**{product['name']}**")
-                st.text(f"📦 {product['category'].title()}")
+                st.markdown(f"<small>📦 {product['category'].title()}</small>", unsafe_allow_html=True)
     else:
         st.info("No products available.")
 
