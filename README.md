@@ -27,7 +27,7 @@ Built with **FastAPI**, **Streamlit**, **MongoDB Atlas**, **Cloudinary**, and **
 ---
 
 ## Project Structure
-
+```
 Visualise-Product-Matcher-JINA-AI/
 ├── app/
 │ ├── api/ # REST routes (search, products, upload)
@@ -42,7 +42,7 @@ Visualise-Product-Matcher-JINA-AI/
 ├── Procfile # Render start command
 ├── runtime.txt # Python version for deployment
 └── uploaded_urls.json # 54 Cloudinary URLs (cars/fruits/phone/softdrink/tshirts)
-
+```
 
 ---
 
@@ -81,8 +81,8 @@ Swagger Docs: `http://<backend-host>/docs`
 
 ## Live
 
-- **Backend (FastAPI):** *(add your Render URL)*  
-- **Frontend (Streamlit):** *(add your Streamlit Cloud URL)*  
+- **Backend (FastAPI):**   
+- **Frontend (Streamlit):**
 
 ---
 
@@ -90,12 +90,7 @@ Swagger Docs: `http://<backend-host>/docs`
 
 1. Generate query image embedding via **Jina CLIP v2**  
 2. Fetch product vectors from MongoDB  
-3. Compute cosine similarity:
-
-   \[
-   sim(a,b) = \frac{a \cdot b}{\|a\| \|b\|}
-   \]
-
+3. Compute cosine similarity
 4. Filter by category (optional), threshold, and return top-k ranked products  
 
 ---
@@ -122,7 +117,6 @@ Swagger Docs: `http://<backend-host>/docs`
 
 Built by **Prakash Singh** — Python developer focused on ML systems, API engineering, and cloud-first applications.  
 **GitHub:** [@Prakashsingh04](https://github.com/Prakashsingh04)  
-**LinkedIn:** *(add your link)*  
 
 ---
 
