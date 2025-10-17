@@ -90,7 +90,18 @@ def search_similar_url(image_url, top_k=10, min_similarity=0.3, category=None):
 
 def search_similar_upload(image_file, top_k=10, min_similarity=0.3, category=None):
     try:
-        files = {"file": image_file}
+        # Ensure we're at the start and read bytes
+        try:
+            image_file.seek(0)
+        except Exception:
+            pass
+        file_bytes = image_file.getvalue() if hasattr(image_file, "getvalue") else image_file.read()
+        filename = getattr(image_file, "name", "upload.jpg")
+        content_type = getattr(image_file, "type", None) or "application/octet-stream"
+
+        files = {
+            "file": (filename, file_bytes, content_type)
+        }
         params = {
             "top_k": top_k,
             "min_similarity": min_similarity
@@ -148,15 +159,22 @@ with tab1:
     
     uploaded_file = st.file_uploader(
         "Choose an image file",
-        type=['png', 'jpg', 'jpeg', 'webp', 'avif'],
-        help="Upload a local image file to find similar products"
+        # Avoid AVIF because Pillow on Streamlit Cloud can't decode it by default
+        type=[
+            'png', 'jpg', 'jpeg', 'webp'
+        ],
+        help="Upload a local image file to find similar products (PNG, JPG, JPEG, WEBP)"
     )
     
     if uploaded_file:
         col_preview, col_info = st.columns([1, 2])
         
         with col_preview:
-            st.image(uploaded_file, caption="Uploaded Image", width="stretch")
+            # Try to preview; if PIL can't decode, show a friendly message instead of crashing
+            try:
+                st.image(uploaded_file, caption="Uploaded Image", width="stretch")
+            except Exception:
+                st.warning("Preview not available for this file type. The search will still attempt to process it.")
         
         with col_info:
             st.info(f"**File:** {uploaded_file.name}\n\n**Size:** {uploaded_file.size / 1024:.1f} KB\n\n**Type:** {uploaded_file.type}")
@@ -205,9 +223,14 @@ with tab1:
                                 </div>
                                 """, unsafe_allow_html=True)
                     elif results is not None:
-                        st.warning("No similar products found. Try:\n- Lowering the similarity threshold\n- Uploading a different image\n- Checking if the image category matches your filter")
+                        st.warning(
+                            "No similar products found. Try:\n"
+                            "- Lowering the similarity threshold\n"
+                            "- Uploading a different image\n"
+                            "- Checking if the image category matches your filter"
+                        )
                     else:
-                        st.error("Search failed. Check the backend logs for details.")
+                        st.error("Search failed. If you uploaded an AVIF image, please convert it to PNG/JPG/WEBP and try again.")
 
 with tab2:
     st.header("Search by Image URL")

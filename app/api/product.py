@@ -110,8 +110,16 @@ async def search_similar_products_upload(
     # Validate file type (handle None content_type)
     content_type = file.content_type or ''
     file_ext = os.path.splitext(file.filename)[1].lower() if file.filename else ''
-    valid_exts = ['.jpg', '.jpeg', '.png', '.webp', '.avif']
+    valid_exts = ['.jpg', '.jpeg', '.png', '.webp']
+    disallowed_exts = ['.avif']
     
+    # Reject AVIF explicitly (Pillow often cannot decode AVIF in server environments)
+    if file_ext in disallowed_exts or content_type == 'image/avif':
+        raise HTTPException(
+            status_code=415,
+            detail="AVIF images are not supported. Please upload PNG/JPG/JPEG/WEBP."
+        )
+
     # Accept if content type is image/* OR if extension is valid
     if not (content_type.startswith('image/') or file_ext in valid_exts):
         raise HTTPException(
