@@ -23,12 +23,19 @@ def find_similar_products(
 ) -> List[Tuple[dict, float]]:
 
     similarities = []
+    q_len = len(query_embedding) if isinstance(query_embedding, (list, tuple)) else 0
     
     for product in products:
-        if 'embedding' not in product or not product['embedding']:
+        emb = product.get('embedding')
+        if not emb:
+            continue
+        # Skip if embedding dimensions don't match
+        if q_len and len(emb) != q_len:
+            # Optional: attach a marker for diagnostics
+            # product['_dim_mismatch'] = True
             continue
         
-        similarity = cosine_similarity(query_embedding, product['embedding'])
+        similarity = cosine_similarity(query_embedding, emb)
         
         if similarity >= min_similarity:
             similarities.append((product, similarity))

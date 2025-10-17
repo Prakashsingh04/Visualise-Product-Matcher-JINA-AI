@@ -59,6 +59,15 @@ async def search_similar_products(request: SearchRequest):
     all_products = await get_all_embeddings()
     db_time = time.time() - db_start
     print(f"[SEARCH] Fetched {len(all_products)} products in {db_time:.2f}s")
+    # Debug: dimensions snapshot
+    try:
+        dims = {}
+        for p in all_products[:20]:
+            d = len(p.get('embedding') or [])
+            dims[d] = dims.get(d, 0) + 1
+        print(f"[SEARCH] Query dim: {len(query_embedding)}, DB dims (top20 sample): {dims}")
+    except Exception as _:
+        pass
     
     # Filter by category if provided
     if request.category:

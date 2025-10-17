@@ -58,10 +58,16 @@ def get_categories():
         response = requests.get(f"{API_BASE}/categories", timeout=5)
         if response.status_code == 200:
             return response.json().get("categories", [])
-    except:
-        st.error(f"Cannot reach backend at {API_BASE}. Check deployment and network access.")
+        else:
+            try:
+                detail = response.json().get('detail')
+            except Exception:
+                detail = response.text
+            st.error(f"Categories fetch failed: {response.status_code} {detail}")
+            return []
+    except Exception as e:
+        st.error(f"Cannot reach backend at {API_BASE}. Error: {e}")
         return []
-    return []
 
 def get_products(category=None, limit=20, skip=0):
     try:
@@ -69,11 +75,20 @@ def get_products(category=None, limit=20, skip=0):
         if category:
             params["category"] = category
         response = requests.get(f"{API_BASE}/products", params=params, timeout=10)
-        return response.json() if response.status_code == 200 else []
-    except:
+        if response.status_code == 200:
+            return response.json()
+        else:
+            try:
+                detail = response.json().get('detail')
+            except Exception:
+                detail = response.text
+            st.warning(f"Products fetch failed: {response.status_code} {detail}")
+            return []
+    except Exception as e:
+        st.warning(f"Products fetch error: {e}")
         return []
 
-def search_similar_url(image_url, top_k=10, min_similarity=0.3, category=None):
+def search_similar_url(image_url, top_k=10, min_similarity=0.25, category=None):
     try:
         payload = {
             "image_url": image_url,
@@ -83,12 +98,20 @@ def search_similar_url(image_url, top_k=10, min_similarity=0.3, category=None):
         if category:
             payload["category"] = category
         response = requests.post(f"{API_BASE}/search", json=payload, timeout=30)
-        return response.json() if response.status_code == 200 else None
+        if response.status_code == 200:
+            return response.json()
+        else:
+            try:
+                detail = response.json().get('detail')
+            except Exception:
+                detail = response.text
+            st.error(f"Search failed: {response.status_code} {detail}")
+            return None
     except Exception as e:
         st.error(f"Search failed: {str(e)}")
         return None
 
-def search_similar_upload(image_file, top_k=10, min_similarity=0.3, category=None):
+def search_similar_upload(image_file, top_k=10, min_similarity=0.25, category=None):
     try:
         # Ensure we're at the start and read bytes
         try:
@@ -114,7 +137,15 @@ def search_similar_upload(image_file, top_k=10, min_similarity=0.3, category=Non
             params=params,
             timeout=30
         )
-        return response.json() if response.status_code == 200 else None
+        if response.status_code == 200:
+            return response.json()
+        else:
+            try:
+                detail = response.json().get('detail')
+            except Exception:
+                detail = response.text
+            st.error(f"Upload search failed: {response.status_code} {detail}")
+            return None
     except Exception as e:
         st.error(f"Upload search failed: {str(e)}")
         return None
