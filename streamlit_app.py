@@ -11,7 +11,7 @@ import streamlit as st
 API_BASE = (
     st.secrets.get("API_BASE")
     if hasattr(st, "secrets") and "API_BASE" in st.secrets
-    else os.getenv("API_BASE", "https://visualise-product-matcher-jina-ai.vercel.app")
+    else os.getenv("API_BASE", "https://visualise-product-matcher-jina-ai.vercel.app/api")
 ).rstrip("/")
 
 # Page config
