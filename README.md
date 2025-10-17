@@ -1,28 +1,27 @@
 # Visual Product Matcher
 
-An end-to-end AI-powered application that lets users upload an image or provide an image URL to find the top visually similar products from a curated catalog.  
-Built with **FastAPI**, **Streamlit**, **MongoDB Atlas**, **Cloudinary**, and **Jina AI (CLIP v2)**.
+An end-to-end AI-powered application that lets users upload an image or provide an image URL to find the top visually similar products present in database.  
+Built with **FastAPI**, **Streamlit**, **MongoDB Atlas**, **Cloudinary**, and **Jina AI (CLIP v2)**. Deployed on **Vercel** (backend) and **Streamlit Cloud** (frontend).
 
----
+## Live Demo
 
-## What this shows
-
-- Production-grade Python full stack with clean API design and async I/O  
-- Practical use of vector embeddings for similarity search at scale  
-- Robust data pipeline: seed → embed → serve → search  
-- Cloud-ready architecture with clear separation of concerns and deploy scripts  
+- **Frontend (Streamlit):** https://visualise-appuct-matcher-jina-ai-6yvussbfby48ctg9bdchz7.streamlit.app/
+- **Backend (Vercel):** https://visualise-product-matcher-jina-ai.vercel.app/
+  - Swagger Docs: `/docs`
+  - Health: `/health`
+  - Key endpoints: `/api/products`, `/api/categories`, `/api/search`, `/api/search-upload`
 
 ---
 
 ## Highlights
 
-- Dual-input search: Upload image or paste image URL  
+- Dual-input search: you can either upload image or paste url
 - Image embeddings via **Jina CLIP v2** (768-dim vectors)  
-- Cosine similarity ranking across categories  
-- Categories supported: cars, fruits, phone, softdrink, tshirts  
-- Images served via **Cloudinary CDN**  
-- Minimal-latency API with **FastAPI** and async **MongoDB (Motor)**  
-- Clean **Streamlit UI** with category filter and threshold controls  
+- Cosine similarity ranking of all categories  
+- Categories : cars, fruits, phone, softdrink, tshirts  
+- Images hosted on  **Cloudinary CDN**  
+- Used **FastAPI** and async **MongoDB (Motor)**  
+- Frontend **Streamlit UI** with category filter and threshold controls(in sidebar top left)  
 
 ---
 
@@ -30,18 +29,17 @@ Built with **FastAPI**, **Streamlit**, **MongoDB Atlas**, **Cloudinary**, and **
 ```
 Visualise-Product-Matcher-JINA-AI/
 ├── app/
-│ ├── api/ # REST routes (search, products, upload)
-│ ├── models/ # Pydantic schemas
-│ └── services/ # MongoDB, Jina, similarity
-├── scripts/ # Seed, embed, and diagnostic scripts
-├── images/ # Optional local samples (by category)
-├── main.py # FastAPI entrypoint
-├── streamlit_app.py # Streamlit UI (upload + URL search + browse)
-├── config.py # Settings via pydantic-settings
-├── requirements.txt # Locked, deploy-tested deps
-├── Procfile # Render start command
-├── runtime.txt # Python version for deployment
-└── uploaded_urls.json # 54 Cloudinary URLs (cars/fruits/phone/softdrink/tshirts)
+│ ├── api/              # REST routes (search, products, upload)
+│ ├── models/           # Pydantic schemas
+│ └── services/         # MongoDB, Jina, similarity
+├── scripts/            # Seed, embed, and diagnostic scripts
+├── images/             # Optional local samples downloaded (by category)
+├── main.py             # FastAPI entrypoint
+├── streamlit_app.py    # Streamlit UI (frontend)
+├── config.py           # pydantic-settings
+├── requirements.txt    # contain requirements
+├── runtime.txt         # Python version for deployment
+└── uploaded_urls.json  # urls hosted on cloudinary 
 ```
 
 ---
@@ -51,17 +49,17 @@ Visualise-Product-Matcher-JINA-AI/
 - **GET /api/products** — List products with pagination and optional category  
 - **POST /api/search** — Search by image URL `{ image_url, top_k, min_similarity, category? }`  
 - **POST /api/search-upload** — Search by uploaded image (form-data file)  
-- **GET /api/categories** — Supported categories  
+- **GET /api/categories** —  categories  
 
-Swagger Docs: `http://<backend-host>/docs`
+Swagger Docs: https://visualise-product-matcher-jina-ai.vercel.app/docs
 
 ---
 
 ## Catalog & Embeddings
 
-- **Total products:** 54  
+- **Total products:** 53  
 - **Categories:** 5 (cars, fruits, phone, softdrink, tshirts)  
-- **Embeddings:** Jina CLIP v2, 768 dimensions  
+- **Embeddings:** Jina CLIP v2, 768 dimensions (always re-embed if dimensions mismatch)  
 - **Storage:** MongoDB Atlas (products collection)  
 
 **Fields:**  
@@ -72,17 +70,46 @@ Swagger Docs: `http://<backend-host>/docs`
 ## Tech Stack
 
 - **Backend:** FastAPI, Motor, NumPy, Pydantic  
-- **Frontend:** Streamlit (URL search, upload, browse, filters)  
-- **Vectorization:** Jina AI (jina-clip-v2)  
+- **Frontend:** Streamlit  
+- **Vectorization/embedding:** Jina AI (jina-clip-v2)  
 - **Infra:** MongoDB Atlas, Cloudinary  
-- **Deployment:** Ready for Render + Streamlit Cloud  
+- **Deployment:** Vercel (backend) + Streamlit Cloud (frontend)  
+- **CI/CD:** GitHub → Vercel/Streamlit auto-deploy
 
 ---
 
-## Live
+## Environment Setup
 
-- **Backend (FastAPI):**   
-- **Frontend (Streamlit):**
+`.env` template (for local development):
+```bash
+MONGO_URI=mongodb+srv://<user>:<pass>@<cluster>/?retryWrites=true&w=majority
+MONGO_DB=visual_product_matcher
+MONGO_COL=products
+JINA_API_KEY=your_jina_api_key
+JINA_ENDPOINT=https://api.jina.ai/v1/embeddings
+APP_HOST=127.0.0.1
+APP_PORT=8000
+```
+
+Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+Run locally:
+```bash
+# Backend
+uvicorn main:app --reload
+
+# Frontend
+streamlit run streamlit_app.py
+```
+
+## Model Compatibility
+
+- Backend uses Jina CLIP v2 for embeddings (768 dimensions)
+- Products must have matching embedding dimensions for similarity search
+- If embeddings mismatch, re-run `embed_products_jina.py` to refresh all vectors
 
 ---
 
@@ -91,32 +118,14 @@ Swagger Docs: `http://<backend-host>/docs`
 1. Generate query image embedding via **Jina CLIP v2**  
 2. Fetch product vectors from MongoDB  
 3. Compute cosine similarity
-4. Filter by category (optional), threshold, and return top-k ranked products  
-
----
-
-## Engineering Decisions
-
-- Kept embeddings in MongoDB for simplicity and portability; can be swapped with a vector DB if scale demands  
-- Standardized on CLIP v2 (768-dim) to ensure consistent similarity metrics across upload and URL modes  
-- Streamlit chosen for rapid iteration and clean UX in Python without a separate JS stack  
-
----
-
-## What Could Be Next
-
-- Switch to a dedicated vector database (Qdrant, Pinecone) for >100k items  
-- Batch embedding refresh pipeline and drift monitoring  
-- Reranking with cross-modal models for tighter precision  
-- Authentication and per-tenant catalogs  
-- Containerized deployment with CI/CD  
+4. Filter by category, threshold, and return top-k ranked products  
 
 ---
 
 ## About
 
-Built by **Prakash Singh** — Python developer focused on ML systems, API engineering, and cloud-first applications.  
-**GitHub:** [@Prakashsingh04](https://github.com/Prakashsingh04)  
+Built by **Prakash Singh**
+**GitHub:** [@Prakashsingh04](https://github.com/Prakashsingh04)
 
 ---
 
