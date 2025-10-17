@@ -11,6 +11,12 @@ class MongoDB:
         # Simple connection with TLS options in connection string
         if not getattr(settings, "mongo_uri", None):
             raise RuntimeError("MONGO_URI is not configured. Set environment variable MONGO_URI.")
+        # If an existing client is bound to a closed event loop, discard it and create a new one
+        try:
+            if cls.client is not None:
+                cls.client.close()
+        except Exception:
+            pass
         cls.client = AsyncIOMotorClient(
             settings.mongo_uri,
             tlsAllowInvalidCertificates=True,
@@ -26,12 +32,12 @@ class MongoDB:
     def get_collection(cls):
         # In some serverless environments (e.g., Vercel), lifespan events may not run reliably.
         # Ensure the client is connected lazily on first use.
-        if cls.client is None:
-            try:
-                cls.connect()
-            except Exception as e:
-                # Re-raise with clearer context
-                raise RuntimeError(f"Failed to initialize MongoDB client: {e}")
+        # Always ensure we have a fresh client per request to avoid 'Event loop is closed'
+        try:
+            cls.connect()
+        except Exception as e:
+            # Re-raise with clearer context
+            raise RuntimeError(f"Failed to initialize MongoDB client: {e}")
 
         db = cls.client[settings.mongo_db]
         return db[settings.mongo_col]
