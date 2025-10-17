@@ -32,11 +32,27 @@ st.markdown("""
         margin-bottom: 2rem;
     }
     .product-card {
-        background: white;
-        padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background: #ffffff;
+        color: #0f172a; /* slate-900 for readability on white */
+        padding: 0; /* we'll pad inner content */
+        border-radius: 12px;
+        border: 1px solid #e5e7eb; /* light border */
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         margin-bottom: 1rem;
+        overflow: hidden; /* round image corners */
+    }
+    .product-card img.product-image {
+        width: 100%;
+        height: auto;
+        display: block;
+        object-fit: cover;
+    }
+    .product-card .product-content {
+        padding: 0.85rem 1rem 1rem 1rem;
+    }
+    .product-card h4, .product-card p, .product-card small, .product-card strong {
+        color: #0f172a; /* ensure text is visible on white */
+        margin: 0.2rem 0;
     }
     .similarity-badge {
         display: inline-block;
@@ -233,24 +249,23 @@ with tab1:
                         for idx, result in enumerate(results['results']):
                             product = result['product']
                             score = result['similarity_score']
-                            
+
+                            if score >= 0.8:
+                                badge_class = "high-similarity"
+                            elif score >= 0.5:
+                                badge_class = "med-similarity"
+                            else:
+                                badge_class = "low-similarity"
+
                             with cols[idx % 3]:
-                                st.image(product['url'],width="stretch")
-                                
-                                if score >= 0.8:
-                                    badge_class = "high-similarity"
-                                elif score >= 0.5:
-                                    badge_class = "med-similarity"
-                                else:
-                                    badge_class = "low-similarity"
-                                
                                 st.markdown(f"""
                                 <div class="product-card">
-                                    <h4>{product['name']}</h4>
-                                    <p><strong>Category:</strong> {product['category'].title()}</p>
-                                    <span class="similarity-badge {badge_class}">
-                                        {score:.1%} Match
-                                    </span>
+                                    <img src="{product['url']}" alt="{product['name']}" class="product-image" />
+                                    <div class="product-content">
+                                        <h4 class="product-title">{product['name']}</h4>
+                                        <p><strong>Category:</strong> {product['category'].title()}</p>
+                                        <span class="similarity-badge {badge_class}">{score:.1%} Match</span>
+                                    </div>
                                 </div>
                                 """, unsafe_allow_html=True)
                     elif results is not None:
@@ -301,24 +316,23 @@ with tab2:
                     for idx, result in enumerate(results['results']):
                         product = result['product']
                         score = result['similarity_score']
-                        
+
+                        if score >= 0.8:
+                            badge_class = "high-similarity"
+                        elif score >= 0.5:
+                            badge_class = "med-similarity"
+                        else:
+                            badge_class = "low-similarity"
+
                         with cols[idx % 3]:
-                            st.image(product['url'], width="stretch")
-                            
-                            if score >= 0.8:
-                                badge_class = "high-similarity"
-                            elif score >= 0.5:
-                                badge_class = "med-similarity"
-                            else:
-                                badge_class = "low-similarity"
-                            
                             st.markdown(f"""
                             <div class="product-card">
-                                <h4>{product['name']}</h4>
-                                <p><strong>Category:</strong> {product['category'].title()}</p>
-                                <span class="similarity-badge {badge_class}">
-                                    {score:.1%} Match
-                                </span>
+                                <img src="{product['url']}" alt="{product['name']}" class="product-image" />
+                                <div class="product-content">
+                                    <h4 class="product-title">{product['name']}</h4>
+                                    <p><strong>Category:</strong> {product['category'].title()}</p>
+                                    <span class="similarity-badge {badge_class}">{score:.1%} Match</span>
+                                </div>
                             </div>
                             """, unsafe_allow_html=True)
                 else:
@@ -341,9 +355,15 @@ with tab3:
         cols = st.columns(5)
         for idx, product in enumerate(products):
             with cols[idx % 5]:
-                st.image(product['url'], width="stretch")
-                st.caption(f"**{product['name']}**")
-                st.markdown(f"<small> {product['category'].title()}</small>", unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="product-card">
+                    <img src="{product['url']}" alt="{product['name']}" class="product-image" />
+                    <div class="product-content">
+                        <h4 class="product-title">{product['name']}</h4>
+                        <p><strong>Category:</strong> {product['category'].title()}</p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
     else:
         st.info("No products available.")
 
